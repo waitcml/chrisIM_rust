@@ -1,0 +1,104 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: auth-service
+  namespace: rustim
+  labels:
+    app: auth-service
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: auth-service
+  template:
+    metadata:
+      labels:
+        app: auth-service
+    spec:
+      containers:
+      - name: auth-service
+        image: ${REGISTRY}/rustim/auth-service:${TAG}
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 50051
+          name: grpc
+        - containerPort: 50052
+          name: health
+        env:
+        - name: JWT_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: rustim-secrets
+              key: jwt-secret
+        - name: OSS_ENDPOINT
+          valueFrom:
+            secretKeyRef:
+              name: rustim-secrets
+              key: oss-endpoint
+        - name: OSS_ACCESS_KEY
+          valueFrom:
+            secretKeyRef:
+              name: rustim-secrets
+              key: oss-access-key
+        - name: OSS_SECRET_KEY
+          valueFrom:
+            secretKeyRef:
+              name: rustim-secrets
+              key: oss-secret-key
+        - name: OSS_BUCKET
+          valueFrom:
+            secretKeyRef:
+              name: rustim-secrets
+              key: oss-bucket
+        - name: OSS_AVATAR_BUCKET
+          valueFrom:
+            secretKeyRef:
+              name: rustim-secrets
+              key: oss-avatar-bucket
+        - name: OSS_REGION
+          valueFrom:
+            secretKeyRef:
+              name: rustim-secrets
+              key: oss-region
+        resources:
+          limits:
+            cpu: "500m"
+            memory: "512Mi"
+          requests:
+            cpu: "200m"
+            memory: "256Mi"
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: health
+          initialDelaySeconds: 30
+          periodSeconds: 10
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: health
+          initialDelaySeconds: 5
+          periodSeconds: 5
+        volumeMounts:
+        - name: config-volume
+          mountPath: /config
+      volumes:
+      - name: config-volume
+        configMap:
+          name: auth-service-config
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: auth-service
+  namespace: rustim
+spec:
+  selector:
+    app: auth-service
+  ports:
+  - port: 50051
+    targetPort: grpc
+    name: grpc
+  - port: 50052
+    targetPort: health
+    name: health 

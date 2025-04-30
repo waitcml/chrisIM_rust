@@ -1,0 +1,42 @@
+# 服务配置
+service:
+  host: "0.0.0.0"  # 在Docker中使用0.0.0.0绑定所有接口
+  port: 50051
+
+# 数据库配置
+database:
+  url: "postgres://kelisi:123456@postgres:5432/rustim"
+
+# Redis配置
+redis:
+  url: "redis://redis:6379"
+
+# Kafka配置
+kafka:
+  bootstrap_servers: "kafka:9092"
+  topic_private_messages: "private_messages"
+  topic_group_messages: "group_messages"
+  consumer_group_id: "rustim_consumer_group"
+
+# JWT配置
+jwt:
+  secret: "development_jwt_secret_do_not_use_in_production"
+  expiration: 86400  # 24小时
+
+# Consul配置
+consul:
+  url: "http://consul:8500"
+  service_refresh_interval: 30
+
+# OSS配置
+oss:
+  endpoint: ""
+  access_key: ""
+  secret_key: ""
+  bucket: ""
+  avatar_bucket: ""
+  region: ""
+
+# 日志配置
+log:
+  level: "info" 
