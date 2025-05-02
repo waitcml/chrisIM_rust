@@ -24,8 +24,9 @@ async-trait = { workspace = true }
 config = { workspace = true, features = ["yaml", "toml", "json"] }
 reqwest = { workspace = true, features = ["json"] }
 bcrypt = { workspace = true }
+aws-sdk-s3 = {workspace = true }
 # 配置监听
-notify = { version = "5.1.0", optional = true }
+notify = { version = "8.0.0", optional = true }
 
 [features]
 default = []

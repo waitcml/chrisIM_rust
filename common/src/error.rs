@@ -1,3 +1,4 @@
+use aws_sdk_s3::error::SdkError;
 use serde::de::StdError;
 use thiserror::Error;
 
@@ -38,6 +39,8 @@ pub enum Error {
 
     #[error("gRPC状态错误: {0}")]
     TonicStatus(#[from] tonic::Status),
+
+    OSSError,
 }
 
 impl From<String> for Error {
@@ -72,13 +75,12 @@ impl From<Error> for tonic::Status {
     }
 }
 
-/// SdkError is not Send and Sync, so we just extract the details
 impl<E> From<SdkError<E>> for Error
 where
     E: StdError + 'static,
 {
     fn from(sdk_error: SdkError<E>) -> Self {
-        let kind = ErrorKind::OSSError;
+        let kind = Error::OSSError;
 
         let details = sdk_error.to_string();
 

@@ -49,7 +49,7 @@ impl RedisCache {
             group_seq_exe_sha,
         }
     }
-    pub fn from_config(config: &Config) -> Self {
+    pub fn from_config(config: &AppConfig) -> Self {
         // Intentionally use unwrap to ensure Redis connection at startup.
         // Program should panic if unable to connect to Redis, as it's critical for operation.
         let client = redis::Client::open(config.redis.url()).unwrap();
@@ -398,7 +398,7 @@ impl Cache for RedisCache {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use abi::config::Config;
+    use common::config::AppConfig;
     use std::ops::Deref;
     use std::thread;
     use tokio::runtime::Runtime;
@@ -436,11 +436,8 @@ mod tests {
             Self::from_db(database)
         }
 
-        // because of the tests are running in parallel,
-        // we need to use different database,
-        // in case of the flush db command will cause conflict in drop method
         fn from_db(db: u8) -> Self {
-            let config = Config::load("../config.yml").unwrap();
+            let config = AppConfig::load("../config.yml").unwrap();
             let url = format!("{}/{}", config.redis.url(), db);
             let client = redis::Client::open(url).unwrap();
             let cache = RedisCache::new(client.clone());

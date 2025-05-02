@@ -5,7 +5,8 @@ use abi::message::GroupMemSeq;
 use async_trait::async_trait;
 
 use abi::config::Config;
-use abi::errors::Error;
+use common::config::AppConfig;
+use common::error::Error;
 
 mod redis;
 
@@ -86,6 +87,6 @@ pub trait Cache: Sync + Send + Debug {
     async fn online_count(&self) -> Result<i64, Error>;
 }
 
-pub fn cache(config: &Config) -> Arc<dyn Cache> {
+pub fn cache(config: &AppConfig) -> Arc<dyn Cache> {
     Arc::new(redis::RedisCache::from_config(config))
 }

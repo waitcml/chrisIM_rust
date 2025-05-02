@@ -7,7 +7,7 @@ edition = "2021"
 [dependencies]
 common = { path = "../common" }
 aws-config = { version = "1.0.1", features = ["behavior-version-latest"] }
-aws-sdk-s3 = { version = "1.4.0", features = ["rt-tokio"] }
+aws-sdk-s3 = {workspace = true }
 aws-smithy-runtime = { version = "1.0.1" }
 aws-smithy-runtime-api = { version = "1.0.1", features = ["client"] }
 aws-smithy-types = { version = "1.0.1", features = ["http-body-0-4-x"] }
