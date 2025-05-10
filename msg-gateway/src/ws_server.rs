@@ -17,7 +17,7 @@ use tokio::sync::{mpsc, RwLock};
 use tonic::transport::Channel;
 use tracing::{error, info, warn};
 
-use common::config::Config;
+use common::config::{AppConfig, Config};
 use common::error::Error;
 use common::message::{Msg, PlatformType};
 
@@ -45,7 +45,7 @@ pub struct Claims {
 pub struct WsServer;
 
 impl WsServer {
-    async fn register_service(config: &Config) -> Result<(), Error> {
+    async fn register_service(config: &AppConfig) -> Result<(), Error> {
         // register service to service register center
         let addr = format!(
             "{}://{}:{}",
@@ -88,7 +88,7 @@ impl WsServer {
         Ok(description)
     }
 
-    pub async fn start(config: Config) {
+    pub async fn start(config: AppConfig) {
         let (tx, rx) = mpsc::channel(1024);
         let hub = Manager::new(tx, &config).await;
         let mut cloned_hub = hub.clone();

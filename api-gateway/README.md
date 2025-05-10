@@ -104,7 +104,7 @@ cargo build --release
 
 #### 运行
 ```bash
-./target/release/gateway-service -c config/gateway.yaml
+./target/release/api-gateway -c config/gateway.yaml
 ```
 
 ### 命令行参数
@@ -239,10 +239,10 @@ GET /metrics
 ### Docker部署
 ```bash
 # 构建镜像
-docker build -t gateway-service .
+docker build -t api-gateway .
 
 # 运行容器
-docker run -p 8000:8000 -v $(pwd)/config:/app/config gateway-service
+docker run -p 8000:8000 -v $(pwd)/config:/app/config api-gateway
 ```
 
 ### Kubernetes部署
@@ -260,7 +260,7 @@ docker run -p 8000:8000 -v $(pwd)/config:/app/config gateway-service
 ### 日志级别
 可以通过设置环境变量`RUST_LOG`来控制日志级别：
 ```bash
-RUST_LOG=info,gateway_service=debug ./target/release/gateway-service
+RUST_LOG=info,gateway_service=debug ./target/release/api-gateway
 ```
 
 ## 性能优化

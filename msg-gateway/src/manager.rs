@@ -1,6 +1,6 @@
 use std::sync::Arc;
 
-use common::config::Config;
+use common::config::{AppConfig, Config};
 use dashmap::DashMap;
 use tokio::sync::mpsc;
 use tracing::{debug, error, info, warn};
@@ -29,7 +29,7 @@ pub struct Manager {
 
 #[allow(dead_code)]
 impl Manager {
-    pub async fn new(tx: mpsc::Sender<Msg>, config: &Config) -> Self {
+    pub async fn new(tx: mpsc::Sender<Msg>, config: &AppConfig) -> Self {
         let cache = cache::cache(config);
         let chat_rpc = utils::get_rpc_client(config, config.rpc.chat.name.clone())
             .await

@@ -1,7 +1,7 @@
 use crate::Cache;
 use common::config::AppConfig;
 use common::error::Error;
-use abi::message::GroupMemSeq;
+use common::message::GroupMemSeq;
 use async_trait::async_trait;
 use redis::AsyncCommands;
 
