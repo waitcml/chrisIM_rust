@@ -29,7 +29,7 @@ mod router;
 use config::CONFIG;
 
 #[derive(Parser, Debug)]
-#[clap(name = "gateway-service", about = "API网关服务")]
+#[clap(name = "api-gateway", about = "API网关服务")]
 struct Args {
     /// 配置文件路径
     #[clap(short, long, default_value = ".env")]

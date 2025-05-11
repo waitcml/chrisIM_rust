@@ -185,4 +185,116 @@ RustIM 支持灵活的配置管理，特别适合容器化环境（如 Docker �
 
 ```
 [INFO] 配置已更新
-``` 
+```
+
+## Windows环境下的构建注意事项
+
+在Windows环境下构建本项目时，特别是对于`rdkafka`库的编译，可能需要以下额外步骤：
+
+1. 安装必要的构建工具：
+   - 安装 [CMake](https://cmake.org/download/)（确保添加到系统PATH）
+   - 安装 [MinGW-w64](https://www.mingw-w64.org/downloads/)（确保添加到系统PATH）
+   - 或者安装 [Visual Studio Build Tools](https://visualstudio.microsoft.com/visual-cpp-build-tools/)
+
+2. 安装 [Git for Windows](https://gitforwindows.org/)（确保添加到系统PATH）
+
+3. **推荐方法**：使用提供的Windows构建脚本：
+   ```
+   scripts\windows-build.bat
+   ```
+   此脚本会自动检查依赖并设置正确的环境变量，然后根据您的选择使用静态或动态构建方式。
+
+4. 手动构建方式：
+   - 设置环境变量以使用原生Windows构建而非Unix命令：
+     ```
+     set CARGO_NET_GIT_FETCH_WITH_CLI=true
+     set CMAKE_GENERATOR=Visual Studio 17 2022
+     ```
+   - 使用动态链接（更简单但可能性能较差）：
+     ```
+     cargo build --features dynamic --no-default-features
+     ```
+   - 或使用CMake静态构建（推荐但需要更多依赖）：
+     ```
+     cargo build
+     ```
+
+若仍然遇到问题，可以考虑在WSL (Windows Subsystem for Linux)中开发，或使用Docker环境。
+
+## 跨平台支持
+
+RustIM系统提供了完整的跨平台支持，可以在MacOS、Windows和各种Linux发行版上构建和运行。
+
+### 自动化构建脚本
+
+为了简化不同平台上的构建流程，我们提供了针对各个平台的自动化构建脚本：
+
+1. **通用构建脚本** - 自动检测环境并调用相应的平台特定脚本：
+   ```bash
+   # Unix环境 (MacOS/Linux)
+   ./scripts/build.sh
+   ```
+
+2. **特定平台脚本**：
+   - **MacOS**：`./scripts/macos-build.sh`
+   - **Linux**：`./scripts/linux-build.sh`
+   - **Windows**：`scripts\windows-build.bat`
+
+### 各平台构建注意事项
+
+#### MacOS
+
+在MacOS上构建需要以下依赖：
+- Homebrew
+- CMake
+- pkg-config
+- OpenSSL
+- librdkafka
+
+MacOS构建脚本会自动检测并提示安装这些依赖。您也可以手动安装：
+```bash
+brew install cmake pkg-config openssl librdkafka
+```
+
+#### Linux
+
+支持多种Linux发行版：
+- Ubuntu/Debian
+- RHEL/CentOS/Fedora
+- SUSE/openSUSE
+- Arch Linux
+
+Linux构建脚本会根据您的发行版自动安装所需依赖。
+
+#### Windows环境
+
+Windows环境下的构建请参考[Windows环境下的构建注意事项](#Windows环境下的构建注意事项)部分。
+
+### Docker支持
+
+对于任何平台，使用Docker是最简单的方式：
+
+```bash
+# 构建Docker镜像
+docker build -t rustim .
+
+# 运行服务
+docker-compose up -d
+```
+
+Docker环境自动处理所有依赖问题，提供一致的运行环境。
+
+### 常见问题排查
+
+1. **rdkafka构建问题**：
+   - 确保已安装CMake和Git
+   - 尝试使用动态链接特性：`cargo build --features dynamic --no-default-features`
+
+2. **OpenSSL相关错误**：
+   - MacOS：设置环境变量 `export OPENSSL_DIR=$(brew --prefix openssl)`
+   - Linux：确保安装了openssl开发包
+   - Windows：参考Windows构建注意事项
+
+3. **构建缓慢**：
+   - 尝试使用系统提供的librdkafka而不是自行构建
+   - 使用动态链接特性：`--features dynamic` 

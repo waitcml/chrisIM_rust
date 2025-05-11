@@ -30,6 +30,6 @@ echo "Starting message-gateway..."
 cargo run --bin message-gateway > logs/message-gateway.log 2>&1 &
 
 echo "Starting gateway-service..."
-cargo run --bin gateway-service > logs/gateway-service.log 2>&1 &
+cargo run --bin api-gateway > logs/api-gateway.log 2>&1 &
 
 echo "All services started. Check logs directory for output." 
