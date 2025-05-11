@@ -33,4 +33,4 @@ default = []
 dynamic-config = ["notify"]
 
 [build-dependencies]
-tonic-build = "0.13.0"
+tonic-build = "0.11.0"
