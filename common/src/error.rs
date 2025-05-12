@@ -40,6 +40,7 @@ pub enum Error {
     #[error("gRPC状态错误: {0}")]
     TonicStatus(#[from] tonic::Status),
 
+    #[error("对象存储服务错误")]
     OSSError,
 }
 
@@ -79,12 +80,8 @@ impl<E> From<SdkError<E>> for Error
 where
     E: StdError + 'static,
 {
-    fn from(sdk_error: SdkError<E>) -> Self {
-        let kind = Error::OSSError;
-
-        let details = sdk_error.to_string();
-
-        Self::with_details(kind, details)
+    fn from(err: SdkError<E>) -> Self {
+        Error::OSSError
     }
 }
 

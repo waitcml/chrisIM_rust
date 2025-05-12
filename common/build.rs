@@ -16,7 +16,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     tonic_build::configure()
         .build_client(true)  // 生成客户端代码
         .build_server(true)  // 生成服务器代码
-        .compile_protos(
+        .compile(
             // 指定要编译的所有proto文件
             &[
                 "proto/auth.proto",
