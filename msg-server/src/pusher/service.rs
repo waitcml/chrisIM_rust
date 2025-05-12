@@ -112,7 +112,7 @@ impl Pusher for PusherService {
             let list = client
                 .query_with_name(self.sub_svr_name.clone())
                 .await
-                .map_err(|e| Error::internal_with_details(e.to_string()))?;
+                .map_err(|e| Error::Internal(e.to_string()))?;
             self.handle_sub_services(list).await;
         }
 
@@ -154,7 +154,7 @@ impl Pusher for PusherService {
             let list = client
                 .query_with_name(self.sub_svr_name.clone())
                 .await
-                .map_err(|e| Error::internal_with_details(e.to_string()))?;
+                .map_err(|e| Error::Internal(e.to_string()))?;
             self.handle_sub_services(list).await;
         }
 

@@ -13,6 +13,7 @@ use crate::config::CONFIG;
 use crate::config::routes_config::ServiceType;
 use crate::auth::jwt::UserInfo;
 use rand::Rng;
+use crate::proxy::grpc_client::GrpcClientFactory;
 
 /// 服务发现接口
 pub struct ServiceDiscovery {
@@ -336,20 +337,10 @@ impl ServiceProxy {
     }
     
     /// 转发gRPC请求
-    async fn forward_grpc_request(&self, _req: Request<Body>, _service_url: &str) -> Response<Body> {
-        // gRPC请求转发需要专门的处理，这里简化实现
-        // 在实际应用中，应该使用专门的gRPC客户端处理
-        
-        error!("gRPC请求转发当前未实现");
-        
-        // 返回未实现错误
-        (
-            StatusCode::NOT_IMPLEMENTED,
-            axum::Json(serde_json::json!({
-                "error": "not_implemented",
-                "message": "gRPC请求转发当前未实现"
-            }))
-        ).into_response()
+    async fn forward_grpc_request(&self, req: Request<Body>, service_url: &str) -> Response<Body> {
+        // 使用GenericGrpcClientFactory处理gRPC请求
+        let factory = crate::proxy::grpc_client::GenericGrpcClientFactory::new();
+        factory.forward_request(req, service_url.to_string()).await
     }
     
     /// 启动服务刷新任务

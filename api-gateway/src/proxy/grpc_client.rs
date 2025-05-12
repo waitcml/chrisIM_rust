@@ -9,10 +9,10 @@ use tracing::info;
 use serde_json::json;
 use axum::Json;
 
-/// gRPC客户端工厂特征
+/// gRPC客户端工厂接口
 pub trait GrpcClientFactory: Send + Sync {
     /// 转发gRPC请求
-    fn forward_request(&self, req: Request<Body>, target_url: &str) -> futures::future::BoxFuture<'static, Response<Body>>;
+    fn forward_request(&self, req: Request<Body>, target_url: String) -> futures::future::BoxFuture<'static, Response<Body>>;
     
     /// 检查健康状态
     fn check_health(&self) -> futures::future::BoxFuture<'static, bool>;
@@ -86,7 +86,7 @@ impl GenericGrpcClientFactory {
 }
 
 impl GrpcClientFactory for GenericGrpcClientFactory {
-    fn forward_request(&self, _req: Request<Body>, target_url: &str) -> futures::future::BoxFuture<'static, Response<Body>> {
+    fn forward_request(&self, _req: Request<Body>, target_url: String) -> futures::future::BoxFuture<'static, Response<Body>> {
         Box::pin(async move {
             // TODO: 实现真正的gRPC请求转发逻辑
             // 需要根据特定的proto定义实现客户端

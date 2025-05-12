@@ -4,18 +4,27 @@ use axum::{
     http::Request,
     body::{Bytes, Body},
 };
-use crate::auth::error::AuthError;
+use common::error::Error;
 use crate::auth::jwt::UserInfo;
 use http_body_util::BodyExt;
 
 /// 认证中间件处理函数
-pub async fn auth_middleware<B>(request: Request<B>, next: Next) -> Result<Response, AuthError> 
+pub async fn auth_middleware<B>(request: Request<B>, next: Next) -> Result<Response, Error> 
 where 
     B: axum::body::HttpBody<Data = Bytes> + Send + 'static,
     B::Error: std::fmt::Display + Send + Sync + 'static
 {
+    // 收集请求体并创建新的请求实例
+    let (parts, body) = request.into_parts();
+    let bytes = body.collect().await
+        .map_err(|e| Error::Internal(format!("无法读取请求体: {}", e)))?
+        .to_bytes();
+    
+    let new_body = Body::from(bytes);
+    let new_request = Request::from_parts(parts, new_body);
+    
     // 调用统一认证入口
-    crate::auth::authenticate(request, next).await
+    crate::auth::authenticate(new_request, next).await
 }
 
 /// 权限验证中间件
@@ -23,7 +32,7 @@ pub async fn authorize<B>(
     request: Request<B>,
     next: Next,
     required_roles: Vec<String>
-) -> Result<Response, AuthError> 
+) -> Result<Response, Error> 
 where 
     B: axum::body::HttpBody<Data = Bytes> + Send + 'static,
     B::Error: std::fmt::Display + Send + Sync + 'static
@@ -32,17 +41,17 @@ where
     let user = request.extensions()
         .get::<UserInfo>()
         .cloned()
-        .ok_or(AuthError::Unauthorized)?;
+        .ok_or(Error::Unauthorized)?;
     
     // 检查用户角色
     if !required_roles.is_empty() && !has_required_roles(&user.roles, &required_roles) {
-        return Err(AuthError::InsufficientPermissions);
+        return Err(Error::InsufficientPermissions);
     }
     
     // 转换请求体类型
     let (parts, body) = request.into_parts();
     let bytes = body.collect().await
-        .map_err(|_| AuthError::InternalError("无法读取请求体".to_string()))?
+        .map_err(|_| Error::Internal("无法读取请求体".to_string()))?
         .to_bytes();
     let new_body = Body::from(bytes);
     let new_request = Request::from_parts(parts, new_body);
@@ -65,7 +74,7 @@ fn has_required_roles(user_roles: &[String], required_roles: &[String]) -> bool 
 /// 创建需要特定角色的权限中间件
 // pub fn require_roles(
 //     roles: Vec<String>
-// ) -> axum::middleware::from_fn_with_state<(), impl Fn(Request<Body>, Next) -> Result<Response, AuthError>> {
+// ) -> axum::middleware::from_fn_with_state<(), impl Fn(Request<Body>, Next) -> Result<Response, Error>> {
 //     axum::middleware::from_fn(move |request: Request<Body>, next: Next| {
 //         let roles = roles.clone();
 //         async move {

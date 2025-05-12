@@ -28,12 +28,12 @@ impl MsgRpcService {
         let service_registry = ServiceRegistry::from_env();
         let service_id = service_registry.register_service(
             "msg-gateway",
-            host,
-            health_port as u32, // 显式转换为u32类型
+            &config.server.host,
+            config.server.port as u32, // 显式转换为u32类型
             vec!["auth".to_string(), "api".to_string()],
             "/health",
             "15s",
-        ).await?;
+        ).await.map_err(|e| Error::Internal(e.to_string()))?;
         info!("<ws> rpc service register to service register center");
 
         // open health check
