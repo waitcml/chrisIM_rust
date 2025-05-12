@@ -9,6 +9,6 @@ async fn main() {
     tracing_subscriber::fmt()
         .with_max_level(Level::DEBUG)
         .init();
-    let config = AppConfig::from_file("msg-server", "config.yml").unwrap();
+    let config = AppConfig::from_file(Some("./config/config.yaml")).unwrap();
     ChatRpcService::start(&config).await;
 }

@@ -100,7 +100,7 @@ impl ConsumerService {
 
         let mut msg: Msg = serde_json::from_str(payload)?;
 
-        let mt = MsgType::try_from(msg.msg_type).map_err(Error::internal)?;
+        let mt = MsgType::try_from(msg.msg_type).map_err(|e| Error::Internal(e.to_string()))?;
 
         // handle message read type
         if mt == MsgType::Read {
@@ -168,7 +168,7 @@ impl ConsumerService {
 
         futures::future::try_join_all(tasks)
             .await
-            .map_err(Error::internal)?;
+            .map_err(|e| Error::Internal(e.to_string()))?;
 
         Ok(())
     }
@@ -298,7 +298,7 @@ impl ConsumerService {
                 .remove_group_member_id(&msg.receiver_id, &msg.send_id)
                 .await?;
         } else if msg.msg_type == MsgType::GroupRemoveMember as i32 {
-            let data: Vec<String> = bincode::deserialize(&msg.content)?;
+            let data: Vec<String> = bincode::deserialize(&msg.content).map_err(|e| Error::Internal(e.to_string()))?;
 
             let member_ids_ref: Vec<&str> = data.iter().map(AsRef::as_ref).collect();
             self.cache
@@ -401,7 +401,7 @@ impl ConsumerService {
         // wait all tasks
         futures::future::try_join_all(tasks)
             .await
-            .map_err(Error::internal)?;
+            .map_err(|e| Error::Internal(e.to_string()))?;
         Ok(())
     }
 
@@ -460,7 +460,7 @@ impl ConsumerService {
 
         // wait all tasks complete
         let (db_result, msg_rec_box_result) =
-            tokio::try_join!(db_task, msg_rec_box_task).map_err(Error::internal)?;
+            tokio::try_join!(db_task, msg_rec_box_task).map_err(|e| Error::Internal(e.to_string()))?;
 
         db_result?;
         msg_rec_box_result?;
