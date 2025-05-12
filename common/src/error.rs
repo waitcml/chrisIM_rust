@@ -1,5 +1,9 @@
 use aws_sdk_s3::error::SdkError;
+use axum::http::StatusCode;
+use axum::Json;
+use axum::response::{IntoResponse, Response};
 use serde::de::StdError;
+use serde_json::json;
 use thiserror::Error;
 
 #[derive(Debug, Error)]
@@ -12,6 +16,30 @@ pub enum Error {
 
     #[error("授权失败: {0}")]
     Authorization(String),
+
+    #[error("未授权访问")]
+    Unauthorized,
+
+    #[error("Token已过期")]
+    TokenExpired,
+
+    #[error("Token无效")]
+    InvalidToken,
+
+    #[error("签发者无效")]
+    InvalidIssuer,
+
+    #[error("没有足够的权限")]
+    InsufficientPermissions,
+
+    #[error("API Key无效")]
+    InvalidApiKey,
+
+    #[error("API Key已过期")]
+    ApiKeyExpired,
+
+    #[error("OAuth2认证失败: {0}")]
+    OAuth2Error(String),
 
     #[error("资源不存在: {0}")]
     NotFound(String),
@@ -96,5 +124,29 @@ impl From<Error> for axum::http::StatusCode {
             Error::BadRequest(_) => StatusCode::BAD_REQUEST,
             _ => StatusCode::INTERNAL_SERVER_ERROR,
         }
+    }
+}
+
+impl IntoResponse for Error {
+    fn into_response(self) -> Response {
+        let (status, message) = match self {
+            Error::Unauthorized => (StatusCode::UNAUTHORIZED, "未授权访问".to_string()),
+            Error::TokenExpired => (StatusCode::UNAUTHORIZED, "Token已过期".to_string()),
+            Error::InvalidToken => (StatusCode::UNAUTHORIZED, "Token无效".to_string()),
+            Error::InvalidIssuer => (StatusCode::UNAUTHORIZED, "签发者无效".to_string()),
+            Error::InsufficientPermissions => (StatusCode::FORBIDDEN, "没有足够的权限".to_string()),
+            Error::InvalidApiKey => (StatusCode::UNAUTHORIZED, "API Key无效".to_string()),
+            Error::ApiKeyExpired => (StatusCode::UNAUTHORIZED, "API Key已过期".to_string()),
+            Error::OAuth2Error(msg) => (StatusCode::UNAUTHORIZED, msg),
+            Error::Internal(_) => (StatusCode::INTERNAL_SERVER_ERROR, "内部认证错误".to_string()),
+            _ => todo!(),
+        };
+
+        let json = Json(json!({
+            "error": status.as_u16(),
+            "message": message,
+        }));
+
+        (status, json).into_response()
     }
 } 
