@@ -4,7 +4,7 @@ use tonic::transport::Server;
 use tonic::{async_trait, Request, Response, Status};
 use tracing::{debug, info};
 
-use common::config::{Component, Config};
+use common::config::{Component, AppConfig};
 use common::error::Error;
 use common::message::msg_service_server::MsgServiceServer;
 use common::message::{
@@ -22,7 +22,7 @@ impl MsgRpcService {
         Self { manager }
     }
 
-    pub async fn start(manager: Manager, config: &Config) -> Result<(), Error> {
+    pub async fn start(manager: Manager, config: &AppConfig) -> Result<(), Error> {
         // register service to service register center
         // 创建并注册到Consul
         let service_registry = ServiceRegistry::from_env();

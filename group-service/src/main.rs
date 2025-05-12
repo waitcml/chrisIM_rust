@@ -1,7 +1,7 @@
 use anyhow::Result;
 use common::config::AppConfig;
 use clap::Parser;
-use sqlx::{postgres::PgPoolOptions, PgPool};
+use sqlx::postgres::PgPoolOptions;
 use std::net::SocketAddr;
 use tonic::transport::Server;
 use tracing::{info, error, Level};
@@ -37,13 +37,13 @@ async fn main() -> Result<()> {
     tracing::subscriber::set_global_default(subscriber)?;
     
     // 加载配置
-    let config = AppConfig::new("group-service")?;
-    let addr = format!("{}:{}", config.service.host, config.service.port).parse::<SocketAddr>()?;
+    let config = AppConfig::new()?;
+    let addr = format!("{}:{}", config.server.host, config.server.port).parse::<SocketAddr>()?;
     
     // 初始化数据库连接池
     let db_pool = match PgPoolOptions::new()
         .max_connections(10)
-        .connect(&config.database.url)
+        .connect(&config.database.url())
         .await 
     {
         Ok(pool) => {
@@ -56,12 +56,6 @@ async fn main() -> Result<()> {
         }
     };
     
-    // 运行数据库迁移
-    if let Err(err) = run_migrations(&db_pool).await {
-        error!("数据库迁移失败: {}", err);
-        return Err(err);
-    }
-    
     // 初始化群组服务
     let group_service = GroupServiceImpl::new(db_pool);
     
@@ -72,45 +66,5 @@ async fn main() -> Result<()> {
         .serve(addr)
         .await?;
     
-    Ok(())
-}
-
-async fn run_migrations(pool: &PgPool) -> Result<()> {
-    info!("运行数据库迁移...");
-    
-    // 创建groups表
-    sqlx::query(
-        r#"
-        CREATE TABLE IF NOT EXISTS groups (
-            id UUID PRIMARY KEY,
-            name VARCHAR(100) NOT NULL,
-            description VARCHAR(500),
-            avatar_url VARCHAR(255),
-            owner_id UUID NOT NULL,
-            created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-            updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
-        );
-        "#,
-    )
-    .execute(pool)
-    .await?;
-    
-    // 创建group_members表
-    sqlx::query(
-        r#"
-        CREATE TABLE IF NOT EXISTS group_members (
-            id UUID PRIMARY KEY,
-            group_id UUID NOT NULL REFERENCES groups(id) ON DELETE CASCADE,
-            user_id UUID NOT NULL,
-            role INTEGER NOT NULL,
-            joined_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-            UNIQUE(group_id, user_id)
-        );
-        "#,
-    )
-    .execute(pool)
-    .await?;
-    
-    info!("数据库迁移完成");
     Ok(())
 }

@@ -17,7 +17,7 @@ use tokio::sync::{mpsc, RwLock};
 use tonic::transport::Channel;
 use tracing::{error, info, warn};
 
-use common::config::{AppConfig, Config};
+use common::config::AppConfig;
 use common::error::Error;
 use common::message::{Msg, PlatformType};
 
@@ -97,7 +97,7 @@ impl WsServer {
         });
         let app_state = AppState {
             manager: hub.clone(),
-            jwt_secret: config.server.jwt_secret.clone(),
+            jwt_secret: config.jwt.secret.clone(),
         };
 
         // run axum server

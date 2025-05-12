@@ -2,7 +2,7 @@ use anyhow::Result;
 use common::config::AppConfig;
 use common::service_registry::ServiceRegistry;
 use clap::Parser;
-use sqlx::{postgres::PgPoolOptions, PgPool};
+use sqlx::postgres::PgPoolOptions;
 use std::net::SocketAddr;
 use tonic::transport::Server;
 use tracing::{info, warn, error, Level};
@@ -44,15 +44,15 @@ async fn main() -> Result<()> {
     info!("正在启动用户服务...");
     
     // 加载配置
-    let config = AppConfig::new("user-service")?;
-    let host = &config.service.host;
-    let port = config.service.port;
+    let config = AppConfig::new()?;
+    let host = &config.server.host;
+    let port = config.server.port;
     let addr = format!("{}:{}", host, port).parse::<SocketAddr>()?;
     
     // 初始化数据库连接池
     let db_pool = match PgPoolOptions::new()
         .max_connections(10)
-        .connect(&config.database.url)
+        .connect(&config.database.url())
         .await 
     {
         Ok(pool) => {
@@ -64,12 +64,6 @@ async fn main() -> Result<()> {
             return Err(err.into());
         }
     };
-    
-    // 运行数据库迁移
-    if let Err(err) = run_migrations(&db_pool).await {
-        error!("数据库迁移失败: {}", err);
-        return Err(err);
-    }
     
     // 初始化用户服务
     let user_service = UserServiceImpl::new(db_pool);
@@ -119,31 +113,6 @@ async fn main() -> Result<()> {
     let _ = shutdown_signal_task.await?;
     
     info!("用户服务已完全关闭");
-    Ok(())
-}
-
-async fn run_migrations(pool: &PgPool) -> Result<()> {
-    info!("运行数据库迁移...");
-    
-    // 创建users表
-    sqlx::query(
-        r#"
-        CREATE TABLE IF NOT EXISTS users (
-            id UUID PRIMARY KEY,
-            username VARCHAR(50) UNIQUE NOT NULL,
-            email VARCHAR(100) UNIQUE NOT NULL,
-            password_hash VARCHAR(100) NOT NULL,
-            nickname VARCHAR(50),
-            avatar_url VARCHAR(255),
-            created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-            updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
-        );
-        "#,
-    )
-    .execute(pool)
-    .await?;
-    
-    info!("数据库迁移完成");
     Ok(())
 }
 

@@ -3,6 +3,7 @@ use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 use std::time::SystemTime;
 use prost_types;
+use common::message::GroupMemSeq;
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Group {

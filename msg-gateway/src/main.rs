@@ -8,7 +8,7 @@ async fn main() {
     tracing_subscriber::fmt()
         .with_max_level(Level::DEBUG)
         .init();
-    WsServer::start(AppConfig::from_file("auth-service","config.yml").unwrap()).await
+    WsServer::start(AppConfig::from_file(Some("./config/config.yaml")).unwrap()).await
 }
 #[cfg(test)]
 mod tests {

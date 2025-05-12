@@ -272,7 +272,7 @@ impl Cache for RedisCache {
 
         let mut seq = Vec::with_capacity(members.len());
         for item in response.into_iter() {
-            if let redis::Value::Bulk(bulk_item) = item {
+            if let redis::Value::Array(bulk_item) = item {
                 if bulk_item.len() == 3 {
                     if let (
                         redis::Value::Int(cur_seq),
@@ -437,7 +437,7 @@ mod tests {
         }
 
         fn from_db(db: u8) -> Self {
-            let config = AppConfig::load("../config.yml").unwrap();
+            let config = AppConfig::from_file(Some("./config/config.yaml")).unwrap();
             let url = format!("{}/{}", config.redis.url(), db);
             let client = redis::Client::open(url).unwrap();
             let cache = RedisCache::new(client.clone());
