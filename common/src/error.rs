@@ -17,8 +17,8 @@ pub enum Error {
     #[error("授权失败: {0}")]
     Authorization(String),
 
-    #[error("未授权访问: {0}")]
-    Unauthorized(String),
+    #[error("未授权访问")]
+    Unauthorized,
 
     #[error("Token已过期")]
     TokenExpired,
