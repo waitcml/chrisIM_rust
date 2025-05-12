@@ -136,7 +136,7 @@ impl WsServer {
             &DecodingKey::from_secret(jwt_secret.as_bytes()),
             &Validation::default(),
         ) {
-            return Err(Error::unauthorized(err, "/ws"));
+            return Err(Error::Unauthorized(format!("verify token error: {}:{}", err, "/ws")));
         }
         Ok(())
     }

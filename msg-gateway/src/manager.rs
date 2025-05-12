@@ -1,6 +1,6 @@
 use std::sync::Arc;
 
-use common::config::{AppConfig, Config};
+use common::config::AppConfig;
 use dashmap::DashMap;
 use tokio::sync::mpsc;
 use tracing::{debug, error, info, warn};
@@ -221,6 +221,6 @@ impl Manager {
         self.tx
             .send(msg)
             .await
-            .map_err(|e| Error::broadcast(Box::new(e)))
+            .map_err(|e| Error::BroadCastError(e.to_string()))
     }
 }

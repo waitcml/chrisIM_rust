@@ -17,8 +17,8 @@ pub enum Error {
     #[error("授权失败: {0}")]
     Authorization(String),
 
-    #[error("未授权访问")]
-    Unauthorized,
+    #[error("未授权访问: {0}")]
+    Unauthorized(String),
 
     #[error("Token已过期")]
     TokenExpired,
@@ -70,6 +70,9 @@ pub enum Error {
 
     #[error("对象存储服务错误")]
     OSSError,
+    
+    #[error("广播错误: {0}")]
+    BroadCastError(String),
 }
 
 impl From<String> for Error {
@@ -130,7 +133,7 @@ impl From<Error> for axum::http::StatusCode {
 impl IntoResponse for Error {
     fn into_response(self) -> Response {
         let (status, message) = match self {
-            Error::Unauthorized => (StatusCode::UNAUTHORIZED, "未授权访问".to_string()),
+            Error::Unauthorized(_) => (StatusCode::UNAUTHORIZED, "未授权访问".to_string()),
             Error::TokenExpired => (StatusCode::UNAUTHORIZED, "Token已过期".to_string()),
             Error::InvalidToken => (StatusCode::UNAUTHORIZED, "Token无效".to_string()),
             Error::InvalidIssuer => (StatusCode::UNAUTHORIZED, "签发者无效".to_string()),

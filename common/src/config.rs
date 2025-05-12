@@ -45,8 +45,7 @@ impl DatabaseConfig {
             "postgres://{}:{}@{}:{}/{}",
             self.postgres.user,
             self.postgres.password,
-            // self.postgres.host,
-            "postgres",
+            self.postgres.host,
             self.postgres.port,
             self.postgres.database
         )
