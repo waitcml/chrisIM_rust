@@ -92,7 +92,7 @@ impl GrpcClientFactory for GenericGrpcClientFactory {
             // 需要根据特定的proto定义实现客户端
             // 这里返回未实现消息
             info!("收到gRPC请求，目标: {}", target_url);
-            
+
             (
                 StatusCode::NOT_IMPLEMENTED,
                 Json(json!({

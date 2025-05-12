@@ -1,10 +1,10 @@
-use common::config::AppConfig;
-use common::error::Error;
 use async_trait::async_trait;
 use aws_sdk_s3::config::{Builder, Credentials, Region};
 use aws_sdk_s3::Client;
 use aws_smithy_runtime_api::client::result::SdkError;
 use bytes::Bytes;
+use common::config::AppConfig;
+use common::error::Error;
 use tokio::fs;
 use tracing::error;
 
@@ -59,14 +59,14 @@ impl S3Client {
                 if e.raw().status().as_u16() == 404 {
                     Ok(false)
                 } else {
-                    Err(Error::internal_with_details(
-                        "check avatar_bucket exists error",
+                    Err(Error::Internal(
+                        "check avatar_bucket exists error".to_string(),
                     ))
                 }
             }
             Err(e) => {
                 error!("check_bucket_exists error: {:?}", e);
-                Err(Error::internal_with_details(e.to_string()))
+                Err(Error::Internal(e.to_string()))
             }
         }
     }
@@ -84,14 +84,14 @@ impl S3Client {
                 if e.raw().status().as_u16() == 404 {
                     Ok(false)
                 } else {
-                    Err(Error::internal_with_details(
-                        "check avatar_bucket exists error",
+                    Err(Error::Internal(
+                        "check avatar_bucket exists error".to_string(),
                     ))
                 }
             }
             Err(e) => {
                 error!("check avatar_bucket exists error: {:?}", e);
-                Err(Error::internal_with_details(e.to_string()))
+                Err(Error::Internal(e.to_string()))
             }
         }
     }
@@ -188,7 +188,11 @@ impl S3Client {
             .send()
             .await?;
 
-        let data = resp.body.collect().await.map_err(Error::internal)?;
+        let data = resp
+            .body
+            .collect()
+            .await
+            .map_err(|e| Error::Internal(e.to_string()))?;
 
         Ok(data.into_bytes())
     }

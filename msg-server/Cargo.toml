@@ -25,6 +25,5 @@ tracing = { workspace = true }
 tracing-subscriber = { workspace = true, features = ["env-filter", "json"] }
 
 [features]
-default = ["static"]  # 默认使用静态构建
 static = ["rdkafka/cmake-build"]
 dynamic = ["rdkafka/dynamic-linking"]

@@ -1,5 +1,5 @@
 use anyhow::Result;
-use common::config::{AppConfig, DynamicConfig};
+use common::config::DynamicConfig;
 use common::service_registry::ServiceRegistry;
 use clap::Parser;
 use std::net::SocketAddr;
@@ -69,7 +69,6 @@ async fn main() -> Result<()> {
     
     // 创建动态配置
     let dynamic_config = Arc::new(DynamicConfig::new(
-        "auth-service",
         config_paths, 
         args.refresh
     )?);
@@ -79,12 +78,12 @@ async fn main() -> Result<()> {
     
     // 获取初始配置
     let config = dynamic_config.get_config();
-    let host = &config.service.host;
-    let port = config.service.port;
+    let host = &config.server.host;
+    let port = config.server.port;
     let addr = format!("{}:{}", host, port).parse::<SocketAddr>()?;
     
     // 初始化Redis连接池
-    let redis_client = redis::Client::open(config.redis.url.clone())?;
+    let redis_client = redis::Client::open(config.redis.url())?;
     let redis_conn = redis_client.get_multiplexed_async_connection().await?;
     
     // 初始化认证服务

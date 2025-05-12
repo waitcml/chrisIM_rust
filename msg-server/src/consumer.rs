@@ -32,7 +32,7 @@ impl ConsumerService {
         info!("start kafka consumer:\t{:?}", config.kafka);
         // init kafka consumer
         let consumer: StreamConsumer = ClientConfig::new()
-            .set("group.id", &config.kafka.topic_group_messages)
+            .set("group.id", &config.kafka.group)
             .set("bootstrap.servers", config.kafka.hosts.join(","))
             .set("enable.auto.commit", "false")
             .set(

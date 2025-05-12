@@ -137,6 +137,7 @@ impl TokenRepository {
     }
     
     /// 使用户的所有令牌失效
+    #[warn(dead_code)]
     pub async fn invalidate_user_tokens(&self, user_id: &str) -> Result<i32> {
         let mut conn = self.redis.clone();
         let user_tokens_key = format!("user_tokens:{}", user_id);
